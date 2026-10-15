@@ -33,6 +33,7 @@ jobs:
           if(!value||!/^https:\/\/[^\s]+\/functions\/v1\/game$/.test(value))throw Error('Configure a variável GAME_API_URL com a URL HTTPS da função game.');
           writeFileSync('docs/config.js','export const GAME_API_URL = '+JSON.stringify(value)+';\n');
           JS
+      - run: cp supabase/functions/game/engine.js docs/rules.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

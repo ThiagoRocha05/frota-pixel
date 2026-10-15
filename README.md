@@ -127,3 +127,8 @@ Atualizações do banco usam comparação de versão para impedir gravações co
 Problema: multiplayer em tablets sem PC ligado. Abordagem: GitHub Pages para a interface e Supabase para regras e salas persistentes. A versão com servidor local foi substituída porque exigia computador ligado. Regra reutilizável: hospedar a página e executar o multiplayer são responsabilidades distintas, ainda que todo o código fique no mesmo repositório.
 
 Referências de configuração: [GitHub Pages com Actions](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages), [deploy de Edge Functions](https://supabase.com/docs/guides/functions/deploy), [autenticação de funções](https://supabase.com/docs/guides/functions/auth), [CORS](https://supabase.com/docs/guides/functions/cors).
+
+
+## Atualização 4.0
+Comando LANÇAR TORPEDO, efeitos de impacto com redução de movimento, treino local contra IA, manual e resumo final. O build copia o motor do servidor para docs/rules.js para compartilhar regras com o treino.
+Salas expiram após 30 minutos sem ações; consultas de estado não renovam esse prazo. Ajustes de frota enviam atividade autenticada no máximo uma vez a cada 30 segundos. A manutenção SQL instala limpeza de vencidas a cada cinco minutos. Salas antigas mantêm o prazo anterior até a próxima ação.

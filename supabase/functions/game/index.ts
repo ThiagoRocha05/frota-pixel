@@ -1,4 +1,4 @@
-import {applyAction,newRoom,playerView,GameError} from './engine.js';
+import {applyAction,newRoom,playerView,GameError,roomExpiry} from './engine.js';
 const base=Deno.env.get('SUPABASE_URL')!,secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 // Endereço exato de origem do GitHub Pages, sem caminho do repositório.
 const allowed=(Deno.env.get('ALLOWED_ORIGINS')||'https://thiagorocha05.github.io').split(',').map(s=>s.trim()).filter(Boolean);
@@ -25,7 +25,7 @@ Deno.serve(async(req:Request)=>{
   if(reader)while(true){const {value,done}=await reader.read();if(done)break;bytes+=value.length;if(bytes>8192){await reader.cancel();throw new GameError('Solicitação muito grande.',413);}text+=decoder.decode(value,{stream:true});}
   text+=decoder.decode();const b=JSON.parse(text||'{}');
   if(!b||typeof b!=='object'||Array.isArray(b))throw new GameError('Solicitação inválida.');
-  const action=b.action;if(!['create','join','state','ready','fire','rematch'].includes(action))throw new GameError('Ação inválida.');
+  const action=b.action;if(!['create','join','state','ready','fire','rematch','activity'].includes(action))throw new GameError('Ação inválida.');
   // Controle persistente funciona entre instâncias, sem guardar IP em texto puro.
   const ip=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
   const bucket=await hash(secret+':'+ip)+':'+Math.floor(Date.now()/60000);
@@ -37,11 +37,11 @@ Deno.serve(async(req:Request)=>{
    if(typeof b.code!=='string'||!/^[A-F0-9]{8}$/.test(b.code))throw new GameError('Código inválido.');
    await db('frota_rooms?expires_at=lt.'+encodeURIComponent(new Date().toISOString()),'DELETE');
    await db('frota_limits?expires_at=lt.'+encodeURIComponent(new Date().toISOString()),'DELETE');
-   const r=newRoom(b.code,b.name,tokenHash);
-   const res=await fetch(base+'/rest/v1/frota_rooms',{method:'POST',headers:{apikey:secret,Authorization:'Bearer '+secret,'Content-Type':'application/json'},body:JSON.stringify({code:b.code,state:r})});
-   if(res.status===409){const rows=await db('frota_rooms?code=eq.'+b.code);const existing=rows[0]?.state;const p=existing?.players.find((p:any)=>p.tokenHash===tokenHash);if(p)return reply(playerView(existing,p));throw new GameError('Código ocupado. Crie outra sala.',409);}
+   const r=newRoom(b.code,b.name,tokenHash),expiresAt=roomExpiry();
+   const res=await fetch(base+'/rest/v1/frota_rooms',{method:'POST',headers:{apikey:secret,Authorization:'Bearer '+secret,'Content-Type':'application/json'},body:JSON.stringify({code:b.code,state:r,expires_at:expiresAt})});
+   if(res.status===409){const rows=await db('frota_rooms?code=eq.'+b.code);const existing=rows[0]?.state;const p=existing?.players.find((p:any)=>p.tokenHash===tokenHash);if(p)return reply({...playerView(existing,p),expiresAt:rows[0].expires_at});throw new GameError('Código ocupado. Crie outra sala.',409);}
    if(!res.ok)throw new GameError('Não foi possível criar a sala.',503);
-   return reply(playerView(r,r.players[0]));
+   return reply({...playerView(r,r.players[0]),expiresAt});
   }
   if(typeof b.code!=='string'||!/^[A-F0-9]{8}$/.test(b.code)||typeof b.token!=='string'||!/^[a-f0-9]{64}$/.test(b.token))throw new GameError('Código ou sessão inválidos.');
   const tokenHash=await hash(b.token);
@@ -50,9 +50,10 @@ Deno.serve(async(req:Request)=>{
    const row=rows[0];if(!row)throw new GameError('Sala não encontrada ou expirada.',404);
    const previousSeen=row.state.players.find((p:any)=>p.tokenHash===tokenHash)?.seen||0;
    const view=applyAction(row.state,action,b,tokenHash,{first:crypto.getRandomValues(new Uint8Array(1))[0]%2});
-   if(action==='state'&&Date.now()-previousSeen<15000)return reply(view);
-   const changed=await db('frota_rooms?code=eq.'+b.code+'&version=eq.'+row.version,'PATCH',{state:row.state,version:row.version+1});
-   if(changed.length)return reply(view);
+   if(action==='state'&&Date.now()-previousSeen<15000)return reply({...view,expiresAt:row.expires_at});
+   const expiresAt=action==='state'?row.expires_at:roomExpiry();
+   const changed=await db('frota_rooms?code=eq.'+b.code+'&version=eq.'+row.version,'PATCH',{state:row.state,version:row.version+1,expires_at:expiresAt});
+   if(changed.length)return reply({...view,expiresAt});
    // Outra ação ganhou a corrida. Releia e revalide antes de gravar.
   }
   throw new GameError('Sala ocupada. Tente novamente.',409);

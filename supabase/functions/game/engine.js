@@ -1,3 +1,5 @@
+export const IDLE_TIMEOUT_MS = 30*60*1000;
+export function roomExpiry(now=Date.now()){return new Date(now+IDLE_TIMEOUT_MS).toISOString();}
 export const SIZES = [5,4,3,3,2];
 export class GameError extends Error { constructor(message,status=400){super(message);this.status=status;} }
 const requireGame=(ok,message,status=409)=>{if(!ok)throw new GameError(message,status);};
@@ -32,6 +34,8 @@ export function applyAction(r,action,b,hash,{now=Date.now(),first=Math.floor(Mat
   const enemy=r.players[1-i],ship=enemy.fleet.find(s=>s.includes(cell));p.shots.push({cell,hit:!!ship,sunk:null});
   if(ship&&ship.every(c=>p.shots.some(s=>s.cell===c)))for(const shot of p.shots)if(ship.includes(shot.cell))shot.sunk=ship;
   if(enemy.fleet.every(s=>s.every(c=>p.shots.some(shot=>shot.cell===c)))){r.phase='finished';r.winner=i;}else r.turn=1-i;
+ }else if(action==='activity'){
+  // Movimento local de preparação autenticado; não revela nem confirma a frota.
  }else if(action==='rematch'){
   requireGame(r.phase==='finished','A partida ainda está em andamento.');p.rematch=true;
   if(r.players.every(p=>p.rematch)){for(const player of r.players){player.fleet=null;player.shots=[];player.rematch=false;}r.phase='setup';r.winner=null;r.round++;}

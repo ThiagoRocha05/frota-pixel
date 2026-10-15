@@ -5,8 +5,9 @@ create table if not exists public.frota_rooms (
  code text primary key check (code ~ '^[A-F0-9]{8}$'),
  version integer not null default 0,
  state jsonb not null,
- expires_at timestamptz not null default now()+interval '24 hours'
+ expires_at timestamptz not null default now()+interval '30 minutes'
 );
+alter table public.frota_rooms alter column expires_at set default now()+interval '30 minutes';
 create index if not exists frota_rooms_expiry on public.frota_rooms(expires_at);
 alter table public.frota_rooms enable row level security;
 revoke all on public.frota_rooms from public,anon,authenticated;
