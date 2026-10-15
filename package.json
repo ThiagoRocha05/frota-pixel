@@ -1,1 +1,1 @@
-{"name":"frota-pixel-mobile","version":"2.0.0","private":true,"type":"module","scripts":{"test":"node --test","check":"node --check docs/app.js && node --check supabase/functions/game/engine.js"},"engines":{"node":">=22"}}
+{"name": "frota-pixel-mobile", "version": "3.0.0", "private": true, "type": "module", "scripts": {"test": "node --test", "check": "node --check docs/app.js && node --check docs/placement.js && node --check docs/art.js && node --check supabase/functions/game/engine.js"}, "engines": {"node": ">=22"}}

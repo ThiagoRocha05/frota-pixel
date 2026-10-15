@@ -4,17 +4,17 @@ Batalha naval para **dois tablets ou celulares**, abrindo um link do **GitHub Pa
 
 Jogue em https://thiagorocha05.github.io/frota-pixel/ . Backend ativo no Supabase, com teste real de sala, dois jogadores, 33 disparos, vitória e revanche aprovado. Interface responsiva por toque; validação em tablets físicos ainda pendente.
 
-## Como será a experiência
+## Como jogar
 
 1. Os dois jogadores abrem o mesmo link, por exemplo `https://SEU-USUARIO.github.io/frota-pixel/`.
 2. Um informa seu nome e cria uma sala; compartilha o convite ou código de oito caracteres.
 3. O outro entra na sala pelo convite ou digita o código.
-4. Cada um toca no navio e depois na casa inicial. Use HORIZONTAL/VERTICAL para girar ou ALEATÓRIO para distribuir a frota.
+4. Arraste os navios do estaleiro para a grade com o dedo ou mouse. Navios já posicionados podem ser arrastados por qualquer parte. Também é possível tocar em um navio e depois na casa inicial. Use GIRAR para mudar a orientação, DESFAZER para voltar, RETIRAR para devolver um navio ao estaleiro ou DISTRIBUIR para posicionar automaticamente. No teclado, R gira e Ctrl/Cmd+Z desfaz. A frota em preparação é salva ao atualizar a página.
 5. Ambos confirmam as frotas. O primeiro jogador é sorteado.
 6. No Radar, toque em uma casa e depois em **DISPARAR EM A1**, por exemplo. A confirmação evita disparos acidentais durante a rolagem.
 7. Vence quem afundar os cinco navios. A revanche começa quando ambos a solicitarem.
 
-Em telas menores, as abas MINHA FROTA e RADAR INIMIGO mantêm um tabuleiro grande de cada vez. Tablets largos podem mostrar os dois. Não é necessário arrastar, usar mouse ou girar o dispositivo. Pode jogar entre Android, iPad e outros navegadores modernos, inclusive em redes diferentes. A partida exige internet.
+Em telas menores, as abas MINHA FROTA e RADAR INIMIGO mantêm um tabuleiro grande de cada vez. Tablets largos podem mostrar os dois. Há posicionamento por arraste e também por toque/clique, sem obrigar um gesto específico. Pode jogar entre Android, iPad e outros navegadores modernos, inclusive em redes diferentes. A partida exige internet.
 
 ## Arquitetura
 
