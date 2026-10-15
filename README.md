@@ -16,6 +16,12 @@ Jogue em https://thiagorocha05.github.io/frota-pixel/ . Backend ativo no Supabas
 
 Em telas menores, as abas MINHA FROTA e RADAR INIMIGO mantêm um tabuleiro grande de cada vez. Tablets largos podem mostrar os dois. Há posicionamento por arraste e também por toque/clique, sem obrigar um gesto específico. Pode jogar entre Android, iPad e outros navegadores modernos, inclusive em redes diferentes. A partida exige internet.
 
+## Enquadramento e turnos
+
+Durante o ataque, o mapa é dimensionado pela largura e pela altura disponíveis na janela, com o botão de disparo sempre no painel de combate. Em celulares deitados com pouca altura, os controles vão para a lateral. O botão TELA CHEIA é oferecido quando o navegador suporta essa função. A fase de montagem da frota continua com rolagem normal.
+
+A sua vez é destacada na barra de status, no título da aba e em um aviso temporário. Se o som estiver ligado, toca um sinal; aparelhos com suporte também vibram. O alerta também aparece ao voltar à página quando já for sua vez. Não são notificações do sistema: o jogo precisa estar aberto e conectado, com sincronização de aproximadamente três segundos.
+
 ## Arquitetura
 
 O GitHub Pages hospeda os arquivos estáticos da pasta `docs`. Uma Edge Function do Supabase recebe as ações e guarda o estado no Postgres. Não há servidor Node.js no aparelho do usuário. O projeto completo, inclusive o backend, fica no GitHub; a execução do backend ocorre no Supabase.
