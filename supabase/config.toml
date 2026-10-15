@@ -1,0 +1,4 @@
+project_id = "frota-pixel"
+
+[functions.game]
+verify_jwt = false

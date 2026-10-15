@@ -1,0 +1,42 @@
+name: Publicar Frota Pixel
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm test
+      - run: npm run check
+      - name: Configurar endereço do multiplayer
+        env:
+          GAME_API_URL: ${{ vars.GAME_API_URL || 'https://suuvmhlqwsxyadxguluc.supabase.co/functions/v1/game' }}
+        run: |
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          const value=process.env.GAME_API_URL;
+          if(!value||!/^https:\/\/[^\s]+\/functions\/v1\/game$/.test(value))throw Error('Configure a variável GAME_API_URL com a URL HTTPS da função game.');
+          writeFileSync('docs/config.js','export const GAME_API_URL = '+JSON.stringify(value)+';\n');
+          JS
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v4
