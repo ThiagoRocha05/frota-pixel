@@ -15,7 +15,6 @@ Deno.serve(async(req:Request)=>{
  const permitted=allowed.includes(origin);
  const headers={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin','Access-Control-Allow-Origin':permitted?origin:'null','Access-Control-Allow-Headers':'content-type,apikey','Access-Control-Allow-Methods':'POST, OPTIONS'};
  const reply=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers});
- if(!allowed.length)return reply({error:'O administrador precisa configurar ALLOWED_ORIGINS no backend.'},503);
  if(!permitted)return reply({error:'Origem não autorizada.'},403);
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
  if(req.method!=='POST')return reply({error:'Método inválido.'},405);
@@ -27,7 +26,7 @@ Deno.serve(async(req:Request)=>{
   if(!b||typeof b!=='object'||Array.isArray(b))throw new GameError('Solicitação inválida.');
   const action=b.action;if(!['create','join','state','ready','fire','rematch','activity'].includes(action))throw new GameError('Ação inválida.');
   // Controle persistente funciona entre instâncias, sem guardar IP em texto puro.
-  const ip=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
+  const ip=req.headers.get('cf-connecting-ip')||req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
   const bucket=await hash(secret+':'+ip)+':'+Math.floor(Date.now()/60000);
   if(!await db('rpc/frota_consume_limit','POST',{p_bucket:bucket,p_max:180}))throw new GameError('Muitas solicitações. Aguarde um minuto.',429);
   if(action==='create'){
